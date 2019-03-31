@@ -204,9 +204,9 @@ def dynamic_tension_handler(scene):
         for i in bpy.data.objects:
             i.dynamic_tension_map_on = False
         
-        for i in bpy.app.handlers.scene_update_post:
+        for i in bpy.app.handlers.depsgraph_update_post:
             if i.__name__ == 'dynamic_tension_handler':
-                bpy.app.handlers.scene_update_post.remove(i)
+                bpy.app.handlers.depsgraph_update_post.remove(i)
     
     for i, value in items:    
         if i in bpy.data.objects:
@@ -323,11 +323,11 @@ def toggle_display(self, context):
         
         prop_callback(bpy.context.scene, bpy.context)
         
-        for i in bpy.app.handlers.scene_update_post:
+        for i in bpy.app.handlers.depsgraph_update_post:
             if i.__name__ == 'dynamic_tension_handler':
                 return
 
-        bpy.app.handlers.scene_update_post.append(dynamic_tension_handler)        
+        bpy.app.handlers.depsgraph_update_post.append(dynamic_tension_handler)        
 
 
 def pattern_on_off(self, context):
@@ -429,7 +429,7 @@ class DynamicTensionMap(bpy.types.Panel):
     bl_label = "Dynamic Tension Map"
     bl_idname = "dynamic tension map"
     bl_space_type = 'VIEW_3D'
-    bl_region_type = 'TOOLS'
+    bl_region_type = 'UI'
     bl_category = "Extended Tools"
     gt_show = True
     
@@ -471,20 +471,20 @@ def register():
 
 def unregister():
     remove_properties()
-    for i in bpy.app.handlers.scene_update_post:
+    for i in bpy.app.handlers.depsgraph_update_post:
         if i.__name__ == 'dynamic_tension_handler':
-            bpy.app.handlers.scene_update_post.remove(i)
+            bpy.app.handlers.depsgraph_update_post.remove(i)
     bpy.utils.unregister_class(DynamicTensionMap)
     bpy.utils.unregister_class(UpdatePattern)
 
     
-if __name__ == "__main__":
-    register()
-    
-    
-    for i in bpy.data.objects:
-        i.dynamic_tension_map_on = False
-    
-    for i in bpy.app.handlers.scene_update_post:
-        if i.__name__ == 'dynamic_tension_handler':
-            bpy.app.handlers.scene_update_post.remove(i)    
+    if __name__ == "__main__":
+        register()
+        
+        
+        for i in bpy.data.objects:
+            i.dynamic_tension_map_on = False
+        
+        for i in bpy.app.handlers.depsgraph_update_post:
+            if i.__name__ == 'dynamic_tension_handler':
+                bpy.app.handlers.depsgraph_update_post.remove(i)    

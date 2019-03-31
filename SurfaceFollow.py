@@ -498,7 +498,7 @@ class SurfaceFollowPanel(bpy.types.Panel):
     bl_label = "Surface Follow Panel"
     bl_idname = "Surface Panel"
     bl_space_type = 'VIEW_3D'
-    bl_region_type = 'TOOLS'
+    bl_region_type = 'UI'
     bl_category = "Extended Tools"
     #gt_show = True
     
@@ -507,7 +507,7 @@ class SurfaceFollowPanel(bpy.types.Panel):
         col = layout.column(align=True)
         col.label(text="Surface Follow")
         col.operator("scene.bind_to_surface", text="Bind to Surface")
-        col.operator("scene.surface_update_once", text="Update Once", icon='RECOVER_AUTO')        
+        col.operator("scene.surface_update_once", text="Update Once", icon='RECOVER_LAST')        
         if not bpy.context.scene.surface_follow_frame:    
             col.prop(bpy.context.scene ,"surface_follow_on", text="Scene Update", icon='SCENE_DATA')               
         if not bpy.context.scene.surface_follow_on:            

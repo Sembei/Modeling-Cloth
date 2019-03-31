@@ -461,7 +461,7 @@ class Print3DTools(bpy.types.Panel):
     bl_label = "3D Print Tools"
     bl_idname = "3D Print Tools"
     bl_space_type = 'VIEW_3D'
-    bl_region_type = 'TOOLS'
+    bl_region_type = 'UI'
     bl_category = "Extended Tools"
     
     def draw(self, context):

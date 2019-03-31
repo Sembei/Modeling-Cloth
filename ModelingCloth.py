@@ -491,8 +491,11 @@ def generate_guide_mesh():
         mesh.from_pydata(verts, edges, faces)  
         mesh.update()
         mesh_ob = bpy.data.objects.new(name, mesh)
-        bpy.context.scene.objects.link(mesh_ob)
-        mesh_ob.show_x_ray = True
+        ##bpy.context.scene.objects.link(mesh_ob) ##FIX
+        bpy.context.scene.collection.objects.link(mesh_ob)
+        
+        # mesh_ob.show_x_ray = True #fix
+        mesh_ob.show_in_front = True
     return mesh_ob
 
 
@@ -502,7 +505,7 @@ def create_giude():
         mesh_ob = bpy.data.objects['ModelingClothPinGuide']
         return mesh_ob
     mesh_ob = generate_guide_mesh()
-    bpy.context.scene.objects.active = mesh_ob
+    bpy.context.view_layer.objects.active = mesh_ob
     bpy.ops.object.material_slot_add()
     if 'ModelingClothPinGuide' in bpy.data.materials:
         mat = bpy.data.materials['ModelingClothPinGuide']
@@ -555,11 +558,11 @@ def reset_shapes(ob=None):
             ob = extra_data['last_object']
 
     if ob.data.shape_keys == None:
-        ob.shape_key_add('Basis')    
+        ob.shape_key_add(name='Basis')    
     if 'modeling cloth source key' not in ob.data.shape_keys.key_blocks:
-        ob.shape_key_add('modeling cloth source key')        
+        ob.shape_key_add(name='modeling cloth source key')        
     if 'modeling cloth key' not in ob.data.shape_keys.key_blocks:
-        ob.shape_key_add('modeling cloth key')        
+        ob.shape_key_add(name='modeling cloth key')        
         ob.data.shape_keys.key_blocks['modeling cloth key'].value=1
     
     keys = ob.data.shape_keys.key_blocks
@@ -824,7 +827,7 @@ def create_instance(new=True):
     #proxy = cloth.ob.to_mesh(bpy.context.scene, False, 'PREVIEW')
     # ----------------
     
-    bpy.context.scene.objects.active = cloth.ob
+    bpy.context.view_layer.objects.active = cloth.ob
     cloth.idxer = np.arange(len(cloth.ob.data.vertices), dtype=np.int32)
     # data only accesible through object mode
     mode = cloth.ob.mode
@@ -1651,11 +1654,11 @@ def manage_continuous_handler(self, context):
         self["modeling_cloth_handler_frame"] = False
         update_pin_group()
     
-    if handler_scene in bpy.app.handlers.scene_update_post:
-        bpy.app.handlers.scene_update_post.remove(handler_scene)
+    if handler_scene in bpy.app.handlers.depsgraph_update_post:
+        bpy.app.handlers.depsgraph_update_post.remove(handler_scene)
     
     if len(data) > 0:
-        bpy.app.handlers.scene_update_post.append(handler_scene)
+        bpy.app.handlers.depsgraph_update_post.append(handler_scene)
     
 
 # =================  Handler  ======================
@@ -1670,9 +1673,9 @@ def handler_frame(scene):
             if i.__name__ == 'handler_frame':
                 bpy.app.handlers.frame_change_post.remove(i)
                 
-        for i in bpy.app.handlers.scene_update_post:
+        for i in bpy.app.handlers.depsgraph_update_post:
             if i.__name__ == 'handler_scene':
-                bpy.app.handlers.scene_update_post.remove(i)                
+                bpy.app.handlers.depsgraph_update_post.remove(i)                
     
     for i, cloth in items:    
         if i in bpy.data.objects: # using the name. The name could change
@@ -1697,9 +1700,9 @@ def handler_scene(scene):
             if i.__name__ == 'handler_frame':
                 bpy.app.handlers.frame_change_post.remove(i)
 
-        for i in bpy.app.handlers.scene_update_post:
+        for i in bpy.app.handlers.depsgraph_update_post:
             if i.__name__ == 'handler_scene':
-                bpy.app.handlers.scene_update_post.remove(i)                
+                bpy.app.handlers.depsgraph_update_post.remove(i)                
     
     for i, cloth in items:    
         if i in bpy.data.objects: # using the name. The name could change
@@ -1789,8 +1792,8 @@ def main(context, event):
 
         # get the ray relative to the object
         matrix_inv = matrix.inverted()
-        ray_origin_obj = matrix_inv * ray_origin
-        ray_target_obj = matrix_inv * ray_target
+        ray_origin_obj = matrix_inv @ ray_origin
+        ray_target_obj = matrix_inv @ ray_target
         ray_direction_obj = ray_target_obj - ray_origin_obj
 
         # cast the ray
@@ -1807,17 +1810,17 @@ def main(context, event):
     for obj, matrix in visible_objects_and_duplis():
         hit, normal, face_index = obj_ray_cast(obj, matrix)
         if hit is not None:
-            hit_world = matrix * hit
+            hit_world = matrix @ hit
             vidx = [v for v in obj.data.polygons[face_index].vertices]
-            verts = np.array([matrix * obj.data.shape_keys.key_blocks['modeling cloth key'].data[v].co for v in obj.data.polygons[face_index].vertices])
+            verts = np.array([matrix @ obj.data.shape_keys.key_blocks['modeling cloth key'].data[v].co for v in obj.data.polygons[face_index].vertices])
             vecs = verts - np.array(hit_world)
             closest = vidx[np.argmin(np.einsum('ij,ij->i', vecs, vecs))]
             length_squared = (hit_world - ray_origin).length_squared
             if best_obj is None or length_squared < best_length_squared:
                 best_length_squared = length_squared
                 best_obj = obj
-                guide.location = matrix * obj.data.shape_keys.key_blocks['modeling cloth key'].data[closest].co
-                extra_data['latest_hit'] = matrix * obj.data.shape_keys.key_blocks['modeling cloth key'].data[closest].co
+                guide.location = matrix @ obj.data.shape_keys.key_blocks['modeling cloth key'].data[closest].co
+                extra_data['latest_hit'] = matrix @ obj.data.shape_keys.key_blocks['modeling cloth key'].data[closest].co
                 extra_data['name'] = obj.name
                 extra_data['obj'] = obj
                 extra_data['closest'] = closest
@@ -1842,7 +1845,7 @@ class ModelingClothSew(bpy.types.Operator):
         #else:
         obj = bpy.context.object
         
-        #bpy.context.scene.objects.active = obj
+        #bpy.context.view_layer.objects.active = obj
         mode = obj.mode
         if mode != "EDIT":
             bpy.ops.object.mode_set(mode="EDIT")
@@ -1895,7 +1898,7 @@ class ModelingClothPin(bpy.types.Operator):
             extra_data['alert'] = False
             if len(cloths) > 0:                                        #
                 ob = extra_data['last_object']                         #
-                bpy.context.scene.objects.active = ob
+                bpy.context.view_layer.objects.active = ob
             bpy.context.window.cursor_set("DEFAULT")
             return {'CANCELLED'}
 
@@ -1949,8 +1952,8 @@ def main_drag(context, event):
 
         # get the ray relative to the object
         matrix_inv = matrix.inverted()
-        ray_origin_obj = matrix_inv * ray_origin
-        ray_target_obj = matrix_inv * ray_target
+        ray_origin_obj = matrix_inv @ ray_origin
+        ray_target_obj = matrix_inv @ ray_target
         ray_direction_obj = ray_target_obj - ray_origin_obj
         
         # cast the ray
@@ -1970,14 +1973,16 @@ def main_drag(context, event):
         extra_data['target'] = target
         if hit is not None:
             
-            hit_world = matrix * hit
+            hit_world = matrix @ hit
             length_squared = (hit_world - ray_origin).length_squared
 
             if best_obj is None or length_squared < best_length_squared:
                 best_length_squared = length_squared
                 best_obj = obj
                 vidx = [v for v in obj.data.polygons[face_index].vertices]
-                vert = obj.data.shape_keys.key_blocks['modeling cloth key'].data
+                #vert = obj.data.shape_keys.key_blocks['modeling cloth key'].data #FIX
+                vert = bpy.data.objects.data.shape_keys['Key'].key_blocks['modeling cloth key'].data
+
             if best_obj is not None:    
 
                 if extra_data['clicked']:    
@@ -2087,7 +2092,7 @@ class DeletePins(bpy.types.Operator):
             data[ob[1].name].pin_list = l_copy
             data[ob[1].name].hook_list = h_copy
 
-        bpy.context.scene.objects.active = ob[1]
+        bpy.context.view_layer.objects.active = ob[1]
         return {'FINISHED'}
 
 
@@ -2122,9 +2127,9 @@ class PinSelected(bpy.types.Operator):
             e = bpy.data.objects.new('modeling_cloth_pin', None)
             bpy.context.scene.objects.link(e)
             if ob.active_shape_key is None:    
-                closest = matrix * ob.data.vertices[v].co# * matrix
+                closest = matrix @ ob.data.vertices[v].co# * matrix
             else:
-                closest = matrix * ob.active_shape_key.data[v].co# * matrix
+                closest = matrix @ ob.active_shape_key.data[v].co# * matrix
             e.location = closest #* matrix
             e.show_x_ray = True
             e.select = True
@@ -2387,7 +2392,7 @@ class ModelingClothPanel(bpy.types.Panel):
     bl_label = "Modeling Cloth Panel"
     bl_idname = "Modeling Cloth"
     bl_space_type = 'VIEW_3D'
-    bl_region_type = 'TOOLS'
+    bl_region_type = 'UI'
     bl_category = "Extended Tools"
     #gt_show = True
     
@@ -2434,7 +2439,7 @@ class ModelingClothPanel(bpy.types.Panel):
                     col.prop(ob ,"modeling_cloth_inner_margin", text="Inner Margin", icon="STICKY_UVS_LOC")
                     col = layout.column(align=True)
                     
-                col.label("Collide List:")
+                col.label(text="Collide List:")
                 colliders = [i.name for i in bpy.data.objects if i.modeling_cloth_object_collision]
                 for i in colliders:
                     col.label(i)
@@ -2443,7 +2448,7 @@ class ModelingClothPanel(bpy.types.Panel):
 
                     # object collisions
                     col = layout.column(align=True)
-                    col.label("Collisions")
+                    col.label(text="Collisions")
                     if ob.modeling_cloth:    
                         col.prop(ob ,"modeling_cloth_object_detect", text="Object Collisions", icon="PHYSICS")
 
@@ -2476,7 +2481,7 @@ class ModelingClothPanel(bpy.types.Panel):
                     col.prop(ob ,"modeling_cloth_sew", text="Sew Force")#, icon='PLAY')        
                     col.prop(ob ,"modeling_cloth_velocity", text="Velocity")#, icon='PLAY')        
                     col = layout.column(align=True)
-                    col.label("Wind")                
+                    col.label(text="Wind")                
                     col.prop(ob ,"modeling_cloth_wind_x", text="Wind X")#, icon='PLAY')        
                     col.prop(ob ,"modeling_cloth_wind_y", text="Wind Y")#, icon='PLAY')        
                     col.prop(ob ,"modeling_cloth_wind_z", text="Wind Z")#, icon='PLAY')        
@@ -2507,7 +2512,7 @@ class ModelingClothPanel(bpy.types.Panel):
                     
                 # =============================
                 col = layout.column(align=True)
-                col.label('Collision Series')
+                col.label(text='Collision Series')
                 col.operator("object.modeling_cloth_collision_series", text="Paperback")
                 col.operator("object.modeling_cloth_collision_series_kindle", text="Kindle")
                 col.operator("object.modeling_cloth_donate", text="Donate")
@@ -2625,6 +2630,6 @@ if __name__ == "__main__":
         if i.__name__ == 'handler_frame':
             bpy.app.handlers.frame_change_post.remove(i)
             
-    for i in bpy.app.handlers.scene_update_post:
+    for i in bpy.app.handlers.depsgraph_update_post:
         if i.__name__ == 'handler_scene':
-            bpy.app.handlers.scene_update_post.remove(i)            
+            bpy.app.handlers.depsgraph_update_post.remove(i)            

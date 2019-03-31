@@ -7,7 +7,7 @@ bl_info = {
     "name": "Modeling Cloth",
     "author": "Rich Colburn, email: the3dadvantage@gmail.com",
     "version": (1, 0),
-    "blender": (2, 78, 0),
+    "blender": (2, 80, 0),
     "location": "View3D > Extended Tools > Modeling Cloth",
     "description": "Maintains the surface area of an object so it behaves like cloth",
     "warning": "There might be an angry rhinoceros behind you",
@@ -39,5 +39,6 @@ def unregister():
     DynamicTensionMap.unregister()
 
     
-if __name__ == "__main__":
+""" if __name__ == "__main__":
     register()
+ """
