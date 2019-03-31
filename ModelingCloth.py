@@ -1832,7 +1832,7 @@ def main(context, event):
                    
 
 # sewing --------->>>
-class ModelingClothSew(bpy.types.Operator):
+class Modeling_OT_ClothSew(bpy.types.Operator):
     """For connected two edges with sew lines"""
     bl_idname = "object.modeling_cloth_create_sew_lines"
     bl_label = "Modeling Cloth Create Sew Lines"
@@ -1857,7 +1857,7 @@ class ModelingClothSew(bpy.types.Operator):
 # sewing --------->>>
 
 
-class ModelingClothPin(bpy.types.Operator):
+class Modeling_OT_ClothPin(bpy.types.Operator):
     """Modal ray cast for placing pins"""
     bl_idname = "view3d.modeling_cloth_pin"
     bl_label = "Modeling Cloth Pin"
@@ -1999,7 +1999,7 @@ def main_drag(context, event):
                    
                    
 # dragger===
-class ModelingClothDrag(bpy.types.Operator):
+class Modeling_OT_ClothDrag(bpy.types.Operator):
     """Modal ray cast for dragging"""
     bl_idname = "view3d.modeling_cloth_drag"
     bl_label = "Modeling Cloth Drag"
@@ -2072,7 +2072,7 @@ class ModelingClothDrag(bpy.types.Operator):
 
 
 
-class DeletePins(bpy.types.Operator):
+class Delete_OT_Pins(bpy.types.Operator):
     """Delete modeling cloth pins and clear pin list for current object"""
     bl_idname = "object.delete_modeling_cloth_pins"
     bl_label = "Delete Modeling Cloth Pins"
@@ -2096,7 +2096,7 @@ class DeletePins(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class SelectPins(bpy.types.Operator):
+class Select_OT_Pins(bpy.types.Operator):
     """Select modeling cloth pins for current object"""
     bl_idname = "object.select_modeling_cloth_pins"
     bl_label = "Select Modeling Cloth Pins"
@@ -2111,7 +2111,7 @@ class SelectPins(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class PinSelected(bpy.types.Operator):
+class Pin_OT_Selected(bpy.types.Operator):
     """Add pins to verts selected in edit mode"""
     bl_idname = "object.modeling_cloth_pin_selected"
     bl_label = "Modeling Cloth Pin Selected"
@@ -2142,7 +2142,7 @@ class PinSelected(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class UpdataPinWeights(bpy.types.Operator):
+class Updata_OT_PinWeights(bpy.types.Operator):
     """Update Pin Weights"""
     bl_idname = "object.modeling_cloth_update_pin_group"
     bl_label = "Modeling Cloth Update Pin Weights"
@@ -2152,7 +2152,7 @@ class UpdataPinWeights(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class GrowSource(bpy.types.Operator):
+class Grow_OT_Source(bpy.types.Operator):
     """Grow Source Shape"""
     bl_idname = "object.modeling_cloth_grow"
     bl_label = "Modeling Cloth Grow"
@@ -2162,7 +2162,7 @@ class GrowSource(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class ShrinkSource(bpy.types.Operator):
+class Shrink_OT_Source(bpy.types.Operator):
     """Shrink Source Shape"""
     bl_idname = "object.modeling_cloth_shrink"
     bl_label = "Modeling Cloth Shrink"
@@ -2172,7 +2172,7 @@ class ShrinkSource(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class ResetShapes(bpy.types.Operator):
+class Reset_OT_Shapes(bpy.types.Operator):
     """Reset Shapes"""
     bl_idname = "object.modeling_cloth_reset"
     bl_label = "Modeling Cloth Reset"
@@ -2182,7 +2182,7 @@ class ResetShapes(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class AddVirtualSprings(bpy.types.Operator):
+class Add_OT_VirtualSprings(bpy.types.Operator):
     """Add Virtual Springs Between All Selected Vertices"""
     bl_idname = "object.modeling_cloth_add_virtual_spring"
     bl_label = "Modeling Cloth Add Virtual Spring"
@@ -2192,7 +2192,7 @@ class AddVirtualSprings(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class RemoveVirtualSprings(bpy.types.Operator):
+class Remove_OT_VirtualSprings(bpy.types.Operator):
     """Remove Virtual Springs Between All Selected Vertices"""
     bl_idname = "object.modeling_cloth_remove_virtual_spring"
     bl_label = "Modeling Cloth Remove Virtual Spring"
@@ -2202,7 +2202,7 @@ class RemoveVirtualSprings(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class ApplyClothToMesh(bpy.types.Operator):
+class Apply_OT_ClothToMesh(bpy.types.Operator):
     """Apply cloth effects to mesh for export."""
     bl_idname = "object.modeling_cloth_apply_cloth_to_mesh"
     bl_label = "Modeling Cloth Remove Virtual Spring"
@@ -2223,136 +2223,136 @@ class ApplyClothToMesh(bpy.types.Operator):
 
 def create_properties():            
 
-    bpy.types.Object.modeling_cloth = bpy.props.BoolProperty(name="Modeling Cloth", 
+    bpy.types.Object.modeling_cloth : bpy.props.BoolProperty(name="Modeling Cloth",
         description="For toggling modeling cloth", 
         default=False, update=init_cloth)
 
-    bpy.types.Object.modeling_cloth_floor = bpy.props.BoolProperty(name="Modeling Cloth Floor", 
+    bpy.types.Object.modeling_cloth_floor : bpy.props.BoolProperty(name="Modeling Cloth Floor",
         description="Stop at floor", 
         default=False)
 
-    bpy.types.Object.modeling_cloth_pause = bpy.props.BoolProperty(name="Modeling Cloth Pause", 
+    bpy.types.Object.modeling_cloth_pause : bpy.props.BoolProperty(name="Modeling Cloth Pause",
         description="Stop without removing data",
         default=True, update=pause_update)
     
     # handler type ----->>>        
-    bpy.types.Object.modeling_cloth_handler_scene = bpy.props.BoolProperty(name="Modeling Cloth Continuous Update", 
+    bpy.types.Object.modeling_cloth_handler_scene : bpy.props.BoolProperty(name="Modeling Cloth Continuous Update",
         description="Choose continuous update", 
         default=False, update=manage_continuous_handler)        
 
-    bpy.types.Object.modeling_cloth_handler_frame = bpy.props.BoolProperty(name="Modeling Cloth Handler Animation Update", 
+    bpy.types.Object.modeling_cloth_handler_frame : bpy.props.BoolProperty(name="Modeling Cloth Handler Animation Update",
         description="Choose animation update", 
         default=False, update=manage_animation_handler)
         
-    bpy.types.Object.modeling_cloth_auto_reset = bpy.props.BoolProperty(name="Modeling Cloth Reset at Frame 1", 
+    bpy.types.Object.modeling_cloth_auto_reset : bpy.props.BoolProperty(name="Modeling Cloth Reset at Frame 1",
         description="Automatically reset if the current frame number is 1 or less", 
         default=False)#, update=manage_handlers)        
     # ------------------>>>
 
-    bpy.types.Object.modeling_cloth_noise = bpy.props.FloatProperty(name="Modeling Cloth Noise", 
+    bpy.types.Object.modeling_cloth_noise : bpy.props.FloatProperty(name="Modeling Cloth Noise",
         description="Set the noise strength", 
         default=0.001, precision=4, min=0, max=1, update=refresh_noise)
 
-    bpy.types.Object.modeling_cloth_noise_decay = bpy.props.FloatProperty(name="Modeling Cloth Noise Decay", 
+    bpy.types.Object.modeling_cloth_noise_decay : bpy.props.FloatProperty(name="Modeling Cloth Noise Decay",
         description="Multiply the noise by this value each iteration", 
         default=0.99, precision=4, min=0, max=1)#, update=refresh_noise_decay)
 
     # spring forces ------------>>>
-    bpy.types.Object.modeling_cloth_spring_force = bpy.props.FloatProperty(name="Modeling Cloth Spring Force", 
+    bpy.types.Object.modeling_cloth_spring_force : bpy.props.FloatProperty(name="Modeling Cloth Spring Force",
         description="Set the spring force", 
         default=1.0, precision=4, min=0, max=2.5)#, update=refresh_noise)
 
-    bpy.types.Object.modeling_cloth_push_springs = bpy.props.FloatProperty(name="Modeling Cloth Push Spring Force", 
+    bpy.types.Object.modeling_cloth_push_springs : bpy.props.FloatProperty(name="Modeling Cloth Push Spring Force",
         description="Set the push spring force", 
         default=1.0, precision=4, min=0, max=2.5)#, update=refresh_noise)
     
     # bend springs
-    bpy.types.Object.modeling_cloth_bend_stiff = bpy.props.FloatProperty(name="Modeling Cloth Bend Spring Force", 
+    bpy.types.Object.modeling_cloth_bend_stiff : bpy.props.FloatProperty(name="Modeling Cloth Bend Spring Force",
         description="Set the bend spring force", 
         default=0.0, precision=4, min=0, max=10, soft_max=1)#, update=refresh_noise)
     # -------------------------->>>
 
-    bpy.types.Object.modeling_cloth_gravity = bpy.props.FloatProperty(name="Modeling Cloth Gravity", 
+    bpy.types.Object.modeling_cloth_gravity : bpy.props.FloatProperty(name="Modeling Cloth Gravity",
         description="Modeling cloth gravity", 
         default=0.0, precision=4, soft_min=-10, soft_max=10, min=-1000, max=1000)
 
-    bpy.types.Object.modeling_cloth_iterations = bpy.props.IntProperty(name="Stiffness", 
+    bpy.types.Object.modeling_cloth_iterations : bpy.props.IntProperty(name="Stiffness",
         description="How stiff the cloth is", 
         default=2, min=1, max=500)#, update=refresh_noise_decay)
 
-    bpy.types.Object.modeling_cloth_velocity = bpy.props.FloatProperty(name="Velocity", 
+    bpy.types.Object.modeling_cloth_velocity : bpy.props.FloatProperty(name="Velocity",
         description="Cloth keeps moving", 
         default=.98, min= -200, max=200, soft_min= -1, soft_max=1)#, update=refresh_noise_decay)
 
     # Wind. Note, wind should be measured against normal and be at zero when normals are at zero. Squared should work
-    bpy.types.Object.modeling_cloth_wind_x = bpy.props.FloatProperty(name="Wind X", 
+    bpy.types.Object.modeling_cloth_wind_x : bpy.props.FloatProperty(name="Wind X",
         description="Not the window cleaner", 
         default=0, min= -10, max=10, soft_min= -1, soft_max=1)#, update=refresh_noise_decay)
 
-    bpy.types.Object.modeling_cloth_wind_y = bpy.props.FloatProperty(name="Wind Y", 
+    bpy.types.Object.modeling_cloth_wind_y : bpy.props.FloatProperty(name="Wind Y",
         description="Y? Because wind is cool", 
         default=0, min= -10, max=10, soft_min= -1, soft_max=1)#, update=refresh_noise_decay)
 
-    bpy.types.Object.modeling_cloth_wind_z = bpy.props.FloatProperty(name="Wind Z", 
+    bpy.types.Object.modeling_cloth_wind_z : bpy.props.FloatProperty(name="Wind Z",
         description="It's windzee outzide", 
         default=0, min= -10, max=10, soft_min= -1, soft_max=1)#, update=refresh_noise_decay)
 
-    bpy.types.Object.modeling_cloth_turbulence = bpy.props.FloatProperty(name="Wind Turbulence", 
+    bpy.types.Object.modeling_cloth_turbulence : bpy.props.FloatProperty(name="Wind Turbulence",
         description="Add Randomness to wind", 
         default=0, min=0, max=10, soft_min= 0, soft_max=1)#, update=refresh_noise_decay)
 
     # self collision ----->>>
-    bpy.types.Object.modeling_cloth_self_collision = bpy.props.BoolProperty(name="Modeling Cloth Self Collsion", 
+    bpy.types.Object.modeling_cloth_self_collision : bpy.props.BoolProperty(name="Modeling Cloth Self Collsion",
         description="Toggle self collision", 
         default=False, update=collision_data_update)
 
-#    bpy.types.Object.modeling_cloth_self_collision_force = bpy.props.FloatProperty(name="recovery force", 
+#    bpy.types.Object.modeling_cloth_self_collision_force : bpy.props.FloatProperty(name="recovery force",
 #        description="Self colide faces repel", 
 #        default=.17, precision=4, min= -1.1, max=1.1, soft_min= 0, soft_max=1)
 
-    bpy.types.Object.modeling_cloth_self_collision_margin = bpy.props.FloatProperty(name="Margin", 
+    bpy.types.Object.modeling_cloth_self_collision_margin : bpy.props.FloatProperty(name="Margin",
         description="Self colide faces margin", 
         default=.08, precision=4, min= -1, max=1, soft_min= 0, soft_max=1)
 
-#    bpy.types.Object.modeling_cloth_self_collision_cy_size = bpy.props.FloatProperty(name="Cylinder size", 
+#    bpy.types.Object.modeling_cloth_self_collision_cy_size : bpy.props.FloatProperty(name="Cylinder size",
 #        description="Self colide faces cylinder size", 
 #        default=1, precision=4, min= 0, max=4, soft_min= 0, soft_max=1.5)
     # ---------------------->>>
 
     # extras ------->>>
-    bpy.types.Object.modeling_cloth_inflate = bpy.props.FloatProperty(name="inflate", 
+    bpy.types.Object.modeling_cloth_inflate : bpy.props.FloatProperty(name="inflate",
         description="add force to vertex normals", 
         default=0, precision=4, min= -10, max=10, soft_min= -1, soft_max=1)
 
-    bpy.types.Object.modeling_cloth_sew = bpy.props.FloatProperty(name="sew", 
+    bpy.types.Object.modeling_cloth_sew : bpy.props.FloatProperty(name="sew",
         description="add force to vertex normals", 
         default=0, precision=4, min= -10, max=10, soft_min= -1, soft_max=1)
     # -------------->>>
 
     # external collisions ------->>>
-    bpy.types.Object.modeling_cloth_object_collision = bpy.props.BoolProperty(name="Modeling Cloth Self Collsion", 
+    bpy.types.Object.modeling_cloth_object_collision : bpy.props.BoolProperty(name="Modeling Cloth Self Collsion",
         description="Detect and collide with this object", 
         default=False, update=collision_object_update)
 
-    #bpy.types.Object.modeling_cloth_collision_animated = bpy.props.BoolProperty(name="Modeling Cloth Collsion Animated", 
+    #bpy.types.Object.modeling_cloth_collision_animated : bpy.props.BoolProperty(name="Modeling Cloth Collsion Animated",
         #description="Treat collide object as animated. (turn off for speed on static objects)", 
         #default=True)#, update=collision_object_update)
     
-    bpy.types.Object.modeling_cloth_object_detect = bpy.props.BoolProperty(name="Modeling Cloth Self Collsion", 
+    bpy.types.Object.modeling_cloth_object_detect : bpy.props.BoolProperty(name="Modeling Cloth Self Collsion",
         description="Detect collision objects", 
         default=True, update=cloth_object_update)    
 
-    bpy.types.Object.modeling_cloth_outer_margin = bpy.props.FloatProperty(name="Modeling Cloth Outer Margin", 
+    bpy.types.Object.modeling_cloth_outer_margin : bpy.props.FloatProperty(name="Modeling Cloth Outer Margin",
         description="Collision margin on positive normal side of face", 
         default=0.04, precision=4, min=0, max=100, soft_min=0, soft_max=1000)
         
-    bpy.types.Object.modeling_cloth_inner_margin = bpy.props.FloatProperty(name="Modeling Cloth Inner Margin", 
+    bpy.types.Object.modeling_cloth_inner_margin : bpy.props.FloatProperty(name="Modeling Cloth Inner Margin",
         description="Collision margin on negative normal side of face", 
         default=0.08, precision=4, min=0, max=100, soft_min=0, soft_max=1000)        
     # ---------------------------->>>
     
     # more collision stuff ------->>>
-    bpy.types.Object.modeling_cloth_grid_size = bpy.props.IntProperty(name="Modeling Cloth Grid Size", 
+    bpy.types.Object.modeling_cloth_grid_size : bpy.props.IntProperty(name="Modeling Cloth Grid Size",
     description="Max subdivisions for the dynamic broad phase grid", 
     default=10, min=0, max=1000, soft_min=0, soft_max=1000)
     
