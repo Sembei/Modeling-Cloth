@@ -41,9 +41,6 @@
 '''??? Would it make sense to do self collisions with virtual edges ???'''
 '''??? Could do dynamic collision margins for stuff moving fast ???'''
 
-
-
-
 bl_info = {
     "name": "Modeling Cloth",
     "author": "Rich Colburn, email: the3dadvantage@gmail.com",
@@ -63,13 +60,13 @@ from numpy import newaxis as nax
 from bpy_extras import view3d_utils
 import time
 
-#enable_numexpr = True
+# enable_numexpr = True
 enable_numexpr = False
 if enable_numexpr:
     import numexpr as ne
 
 you_have_a_sense_of_humor = False
-#you_have_a_sense_of_humor = True
+# you_have_a_sense_of_humor = True
 if you_have_a_sense_of_humor:
     import antigravity
 
@@ -104,13 +101,12 @@ def triangulate(me, ob=None):
     obm = bmesh.new()
     obm.from_mesh(me)        
     bmesh.ops.triangulate(obm, faces=obm.faces)
-    #obm.to_mesh(me)        
+    # obm.to_mesh(me)
     count = len(obm.faces)    
     #tri_idx = np.zeros(count * 3, dtype=np.int32)        
     #me.polygons.foreach_get('vertices', tri_idx)
     tri_idx = np.array([[v.index for v in f.verts] for f in obm.faces])
-    
-    # Identify bend spring groups. Each edge gets paired with two points on tips of tris around edge    
+    # Identify bend spring groups. Each edge gets paired with two points on tips of tris around edge
     # Restricted to edges with two linked faces on a triangulated version of the mesh
     if ob is not None:
         link_ed = [e for e in obm.edges if len(e.link_faces) == 2]
@@ -119,12 +115,11 @@ def triangulate(me, ob=None):
         fv.shape = (fv.shape[0],6)
         ob.bend_tips = np.array([[idx for idx in fvidx if idx not in e] for e, fvidx in zip(ob.bend_eidx, fv)])
     obm.free()
-    
     return tri_idx#.reshape(count, 3)
 
 
-def tri_normals_in_place(object, tri_co):    
-    """Takes N x 3 x 3 set of 3d triangles and 
+def tri_normals_in_place(object, tri_co):
+    """Takes N x 3 x 3 set of 3d triangles and
     returns non-unit normals and origins"""
     object.origins = tri_co[:,0]
     object.cross_vecs = tri_co[:,1:] - object.origins[:, nax]
@@ -2211,7 +2206,7 @@ class Apply_OT_ClothToMesh(bpy.types.Operator):
         ob = get_last_object()[1]
         v_count = len(ob.data.vertices)
         co = np.zeros(v_count * 3, dtype=np.float32)
-        ob.data.shape_keys.key_blocks['modeling cloth key'].data.foreach_get('co', co)
+        ob.data.objects.data.shape_keys.key_blocks['modeling cloth key'].data.foreach_get('co', co)
         ob.data.shape_keys.key_blocks['Basis'].data.foreach_set('co', co)
         ob.data.shape_keys.key_blocks['Basis'].mute = True
         ob.data.shape_keys.key_blocks['Basis'].mute = False
@@ -2223,86 +2218,86 @@ class Apply_OT_ClothToMesh(bpy.types.Operator):
 
 def create_properties():            
 
-    bpy.types.Object.modeling_cloth : bpy.props.BoolProperty(name="Modeling Cloth",
+    bpy.types.Object.modeling_cloth = bpy.props.BoolProperty(name="Modeling Cloth",
         description="For toggling modeling cloth", 
         default=False, update=init_cloth)
 
-    bpy.types.Object.modeling_cloth_floor : bpy.props.BoolProperty(name="Modeling Cloth Floor",
+    bpy.types.Object.modeling_cloth_floor = bpy.props.BoolProperty(name="Modeling Cloth Floor",
         description="Stop at floor", 
         default=False)
 
-    bpy.types.Object.modeling_cloth_pause : bpy.props.BoolProperty(name="Modeling Cloth Pause",
+    bpy.types.Object.modeling_cloth_pause = bpy.props.BoolProperty(name="Modeling Cloth Pause",
         description="Stop without removing data",
         default=True, update=pause_update)
     
     # handler type ----->>>        
-    bpy.types.Object.modeling_cloth_handler_scene : bpy.props.BoolProperty(name="Modeling Cloth Continuous Update",
+    bpy.types.Object.modeling_cloth_handler_scene = bpy.props.BoolProperty(name="Modeling Cloth Continuous Update",
         description="Choose continuous update", 
         default=False, update=manage_continuous_handler)        
 
-    bpy.types.Object.modeling_cloth_handler_frame : bpy.props.BoolProperty(name="Modeling Cloth Handler Animation Update",
+    bpy.types.Object.modeling_cloth_handler_frame = bpy.props.BoolProperty(name="Modeling Cloth Handler Animation Update",
         description="Choose animation update", 
         default=False, update=manage_animation_handler)
         
-    bpy.types.Object.modeling_cloth_auto_reset : bpy.props.BoolProperty(name="Modeling Cloth Reset at Frame 1",
+    bpy.types.Object.modeling_cloth_auto_reset = bpy.props.BoolProperty(name="Modeling Cloth Reset at Frame 1",
         description="Automatically reset if the current frame number is 1 or less", 
         default=False)#, update=manage_handlers)        
     # ------------------>>>
 
-    bpy.types.Object.modeling_cloth_noise : bpy.props.FloatProperty(name="Modeling Cloth Noise",
+    bpy.types.Object.modeling_cloth_noise = bpy.props.FloatProperty(name="Modeling Cloth Noise",
         description="Set the noise strength", 
         default=0.001, precision=4, min=0, max=1, update=refresh_noise)
 
-    bpy.types.Object.modeling_cloth_noise_decay : bpy.props.FloatProperty(name="Modeling Cloth Noise Decay",
+    bpy.types.Object.modeling_cloth_noise_decay = bpy.props.FloatProperty(name="Modeling Cloth Noise Decay",
         description="Multiply the noise by this value each iteration", 
         default=0.99, precision=4, min=0, max=1)#, update=refresh_noise_decay)
 
     # spring forces ------------>>>
-    bpy.types.Object.modeling_cloth_spring_force : bpy.props.FloatProperty(name="Modeling Cloth Spring Force",
+    bpy.types.Object.modeling_cloth_spring_force = bpy.props.FloatProperty(name="Modeling Cloth Spring Force",
         description="Set the spring force", 
         default=1.0, precision=4, min=0, max=2.5)#, update=refresh_noise)
 
-    bpy.types.Object.modeling_cloth_push_springs : bpy.props.FloatProperty(name="Modeling Cloth Push Spring Force",
+    bpy.types.Object.modeling_cloth_push_springs = bpy.props.FloatProperty(name="Modeling Cloth Push Spring Force",
         description="Set the push spring force", 
         default=1.0, precision=4, min=0, max=2.5)#, update=refresh_noise)
     
     # bend springs
-    bpy.types.Object.modeling_cloth_bend_stiff : bpy.props.FloatProperty(name="Modeling Cloth Bend Spring Force",
+    bpy.types.Object.modeling_cloth_bend_stiff = bpy.props.FloatProperty(name="Modeling Cloth Bend Spring Force",
         description="Set the bend spring force", 
         default=0.0, precision=4, min=0, max=10, soft_max=1)#, update=refresh_noise)
     # -------------------------->>>
 
-    bpy.types.Object.modeling_cloth_gravity : bpy.props.FloatProperty(name="Modeling Cloth Gravity",
+    bpy.types.Object.modeling_cloth_gravity = bpy.props.FloatProperty(name="Modeling Cloth Gravity",
         description="Modeling cloth gravity", 
         default=0.0, precision=4, soft_min=-10, soft_max=10, min=-1000, max=1000)
 
-    bpy.types.Object.modeling_cloth_iterations : bpy.props.IntProperty(name="Stiffness",
+    bpy.types.Object.modeling_cloth_iterations = bpy.props.IntProperty(name="Stiffness",
         description="How stiff the cloth is", 
         default=2, min=1, max=500)#, update=refresh_noise_decay)
 
-    bpy.types.Object.modeling_cloth_velocity : bpy.props.FloatProperty(name="Velocity",
+    bpy.types.Object.modeling_cloth_velocity = bpy.props.FloatProperty(name="Velocity",
         description="Cloth keeps moving", 
         default=.98, min= -200, max=200, soft_min= -1, soft_max=1)#, update=refresh_noise_decay)
 
     # Wind. Note, wind should be measured against normal and be at zero when normals are at zero. Squared should work
-    bpy.types.Object.modeling_cloth_wind_x : bpy.props.FloatProperty(name="Wind X",
+    bpy.types.Object.modeling_cloth_wind_x = bpy.props.FloatProperty(name="Wind X",
         description="Not the window cleaner", 
         default=0, min= -10, max=10, soft_min= -1, soft_max=1)#, update=refresh_noise_decay)
 
-    bpy.types.Object.modeling_cloth_wind_y : bpy.props.FloatProperty(name="Wind Y",
+    bpy.types.Object.modeling_cloth_wind_y = bpy.props.FloatProperty(name="Wind Y",
         description="Y? Because wind is cool", 
         default=0, min= -10, max=10, soft_min= -1, soft_max=1)#, update=refresh_noise_decay)
 
-    bpy.types.Object.modeling_cloth_wind_z : bpy.props.FloatProperty(name="Wind Z",
+    bpy.types.Object.modeling_cloth_wind_z = bpy.props.FloatProperty(name="Wind Z",
         description="It's windzee outzide", 
         default=0, min= -10, max=10, soft_min= -1, soft_max=1)#, update=refresh_noise_decay)
 
-    bpy.types.Object.modeling_cloth_turbulence : bpy.props.FloatProperty(name="Wind Turbulence",
+    bpy.types.Object.modeling_cloth_turbulence = bpy.props.FloatProperty(name="Wind Turbulence",
         description="Add Randomness to wind", 
         default=0, min=0, max=10, soft_min= 0, soft_max=1)#, update=refresh_noise_decay)
 
     # self collision ----->>>
-    bpy.types.Object.modeling_cloth_self_collision : bpy.props.BoolProperty(name="Modeling Cloth Self Collsion",
+    bpy.types.Object.modeling_cloth_self_collision = bpy.props.BoolProperty(name="Modeling Cloth Self Collsion",
         description="Toggle self collision", 
         default=False, update=collision_data_update)
 
@@ -2310,7 +2305,7 @@ def create_properties():
 #        description="Self colide faces repel", 
 #        default=.17, precision=4, min= -1.1, max=1.1, soft_min= 0, soft_max=1)
 
-    bpy.types.Object.modeling_cloth_self_collision_margin : bpy.props.FloatProperty(name="Margin",
+    bpy.types.Object.modeling_cloth_self_collision_margin = bpy.props.FloatProperty(name="Margin",
         description="Self colide faces margin", 
         default=.08, precision=4, min= -1, max=1, soft_min= 0, soft_max=1)
 
@@ -2320,17 +2315,17 @@ def create_properties():
     # ---------------------->>>
 
     # extras ------->>>
-    bpy.types.Object.modeling_cloth_inflate : bpy.props.FloatProperty(name="inflate",
+    bpy.types.Object.modeling_cloth_inflate = bpy.props.FloatProperty(name="inflate",
         description="add force to vertex normals", 
         default=0, precision=4, min= -10, max=10, soft_min= -1, soft_max=1)
 
-    bpy.types.Object.modeling_cloth_sew : bpy.props.FloatProperty(name="sew",
+    bpy.types.Object.modeling_cloth_sew = bpy.props.FloatProperty(name="sew",
         description="add force to vertex normals", 
         default=0, precision=4, min= -10, max=10, soft_min= -1, soft_max=1)
     # -------------->>>
 
     # external collisions ------->>>
-    bpy.types.Object.modeling_cloth_object_collision : bpy.props.BoolProperty(name="Modeling Cloth Self Collsion",
+    bpy.types.Object.modeling_cloth_object_collision = bpy.props.BoolProperty(name="Modeling Cloth Self Collsion",
         description="Detect and collide with this object", 
         default=False, update=collision_object_update)
 
@@ -2338,21 +2333,21 @@ def create_properties():
         #description="Treat collide object as animated. (turn off for speed on static objects)", 
         #default=True)#, update=collision_object_update)
     
-    bpy.types.Object.modeling_cloth_object_detect : bpy.props.BoolProperty(name="Modeling Cloth Self Collsion",
+    bpy.types.Object.modeling_cloth_object_detect = bpy.props.BoolProperty(name="Modeling Cloth Self Collsion",
         description="Detect collision objects", 
         default=True, update=cloth_object_update)    
 
-    bpy.types.Object.modeling_cloth_outer_margin : bpy.props.FloatProperty(name="Modeling Cloth Outer Margin",
+    bpy.types.Object.modeling_cloth_outer_margin = bpy.props.FloatProperty(name="Modeling Cloth Outer Margin",
         description="Collision margin on positive normal side of face", 
         default=0.04, precision=4, min=0, max=100, soft_min=0, soft_max=1000)
         
-    bpy.types.Object.modeling_cloth_inner_margin : bpy.props.FloatProperty(name="Modeling Cloth Inner Margin",
+    bpy.types.Object.modeling_cloth_inner_margin = bpy.props.FloatProperty(name="Modeling Cloth Inner Margin",
         description="Collision margin on negative normal side of face", 
         default=0.08, precision=4, min=0, max=100, soft_min=0, soft_max=1000)        
     # ---------------------------->>>
     
     # more collision stuff ------->>>
-    bpy.types.Object.modeling_cloth_grid_size : bpy.props.IntProperty(name="Modeling Cloth Grid Size",
+    bpy.types.Object.modeling_cloth_grid_size = bpy.props.IntProperty(name="Modeling Cloth Grid Size",
     description="Max subdivisions for the dynamic broad phase grid", 
     default=10, min=0, max=1000, soft_min=0, soft_max=1000)
     
@@ -2387,7 +2382,7 @@ def remove_properties():
     del(bpy.types.Scene.modeling_cloth_data_set_extra)
 
 
-class ModelingClothPanel(bpy.types.Panel):
+class Modeling_PT_Panel(bpy.types.Panel):
     """Modeling Cloth Panel"""
     bl_label = "Modeling Cloth Panel"
     bl_idname = "Modeling Cloth"
@@ -2518,7 +2513,7 @@ class ModelingClothPanel(bpy.types.Panel):
                 col.operator("object.modeling_cloth_donate", text="Donate")
 
 
-class CollisionSeries(bpy.types.Operator):
+class Collision_OT_Series(bpy.types.Operator):
     """Support my addons by checking out my awesome sci fi books"""
     bl_idname = "object.modeling_cloth_collision_series"
     bl_label = "Modeling Cloth Collision Series"
@@ -2528,7 +2523,7 @@ class CollisionSeries(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class CollisionSeriesKindle(bpy.types.Operator):
+class Collision_OT_SeriesKindle(bpy.types.Operator):
     """Support my addons by checking out my awesome sci fi books"""
     bl_idname = "object.modeling_cloth_collision_series_kindle"
     bl_label = "Modeling Cloth Collision Series Kindle"
@@ -2538,7 +2533,7 @@ class CollisionSeriesKindle(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class Donate(bpy.types.Operator):
+class Donate_OT_(bpy.types.Operator):
     """Support my addons by donating"""
     bl_idname = "object.modeling_cloth_donate"
     bl_label = "Modeling Cloth Donate"
@@ -2571,48 +2566,48 @@ def collision_series(paperback=True, kindle=True):
 
 def register():
     create_properties()
-    bpy.utils.register_class(ModelingClothPanel)
-    bpy.utils.register_class(ModelingClothPin)
-    bpy.utils.register_class(ModelingClothDrag)
-    bpy.utils.register_class(DeletePins)
-    bpy.utils.register_class(SelectPins)
-    bpy.utils.register_class(PinSelected)
-    bpy.utils.register_class(GrowSource)
-    bpy.utils.register_class(ShrinkSource)
-    bpy.utils.register_class(ResetShapes)
-    bpy.utils.register_class(UpdataPinWeights)
-    bpy.utils.register_class(AddVirtualSprings)
-    bpy.utils.register_class(RemoveVirtualSprings)
-    bpy.utils.register_class(ModelingClothSew)
-    bpy.utils.register_class(ApplyClothToMesh)
+    bpy.utils.register_class(Modeling_PT_Panel)
+    bpy.utils.register_class(Modeling_OT_ClothPin)
+    bpy.utils.register_class(Modeling_OT_ClothDrag)
+    bpy.utils.register_class(Delete_OT_Pins)
+    bpy.utils.register_class(Select_OT_Pins)
+    bpy.utils.register_class(Pin_OT_Selected)
+    bpy.utils.register_class(Grow_OT_Source)
+    bpy.utils.register_class(Shrink_OT_Source)
+    bpy.utils.register_class(Reset_OT_Shapes)
+    bpy.utils.register_class(Updata_OT_PinWeights)
+    bpy.utils.register_class(Add_OT_VirtualSprings)
+    bpy.utils.register_class(Remove_OT_VirtualSprings)
+    bpy.utils.register_class(Modeling_OT_ClothSew)
+    bpy.utils.register_class(Apply_OT_ClothToMesh)
     
     
-    bpy.utils.register_class(CollisionSeries)
-    bpy.utils.register_class(CollisionSeriesKindle)
-    bpy.utils.register_class(Donate)
+    bpy.utils.register_class(Collision_OT_Series)
+    bpy.utils.register_class(Collision_OT_SeriesKindle)
+    bpy.utils.register_class(Donate_OT_)
 
 
 def unregister():
-    remove_properties()
-    bpy.utils.unregister_class(ModelingClothPanel)
-    bpy.utils.unregister_class(ModelingClothPin)
-    bpy.utils.unregister_class(ModelingClothDrag)
-    bpy.utils.unregister_class(DeletePins)
-    bpy.utils.unregister_class(SelectPins)
-    bpy.utils.unregister_class(PinSelected)
-    bpy.utils.unregister_class(GrowSource)
-    bpy.utils.unregister_class(ShrinkSource)
-    bpy.utils.unregister_class(ResetShapes)
-    bpy.utils.unregister_class(UpdataPinWeights)
-    bpy.utils.unregister_class(AddVirtualSprings)
-    bpy.utils.unregister_class(RemoveVirtualSprings)
-    bpy.utils.unregister_class(ModelingClothSew)
-    bpy.utils.unregister_class(ApplyClothToMesh)
+    # remove_properties()
+    bpy.utils.unregister_class(Modeling_PT_Panel)
+    bpy.utils.unregister_class(Modeling_OT_ClothPin)
+    bpy.utils.unregister_class(Modeling_OT_ClothDrag)
+    bpy.utils.unregister_class(Delete_OT_Pins)
+    bpy.utils.unregister_class(Select_OT_Pins)
+    bpy.utils.unregister_class(Pin_OT_Selected)
+    bpy.utils.unregister_class(Grow_OT_Source)
+    bpy.utils.unregister_class(Shrink_OT_Source)
+    bpy.utils.unregister_class(Reset_OT_Shapes)
+    bpy.utils.unregister_class(Updata_OT_PinWeights)
+    bpy.utils.unregister_class(Add_OT_VirtualSprings)
+    bpy.utils.unregister_class(Remove_OT_VirtualSprings)
+    bpy.utils.unregister_class(Modeling_OT_ClothSew)
+    bpy.utils.unregister_class(Apply_OT_ClothToMesh)
     
     
-    bpy.utils.unregister_class(CollisionSeries)
-    bpy.utils.unregister_class(CollisionSeriesKindle)
-    bpy.utils.unregister_class(Donate)
+    bpy.utils.unregister_class(Collision_OT_Series)
+    bpy.utils.unregister_class(Collision_OT_SeriesKindle)
+    bpy.utils.unregister_class(Donate_OT_)
     
     
 if __name__ == "__main__":

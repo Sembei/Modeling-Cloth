@@ -354,9 +354,9 @@ def multi_bind():
     for i in bpy.context.selected_objects:
         if (i.type == 'MESH') & (i != obj): 
             if i.data.shape_keys == None:
-                i.shape_key_add('Basis')    
+                i.shape_key_add(name='Basis')
             if 'surface follow' not in i.data.shape_keys.key_blocks:
-                i.shape_key_add('surface follow')        
+                i.shape_key_add(name='surface follow')
                 i.data.shape_keys.key_blocks['surface follow'].value=1
             a = transform_matrix(get_coords(obj, obj), obj)
             b = transform_matrix(get_coords(i), i)    
